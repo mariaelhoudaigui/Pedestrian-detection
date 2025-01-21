@@ -1,0 +1,12 @@
+names:
+- Pedestrian
+nc: 1
+roboflow:
+  license: CC BY 4.0
+  project: Pedestrian-dectection
+  url: https://universe.roboflow.com/lazydevs/Pedestrian-dectection/dataset/4
+  version: 4
+  workspace: lazydevs
+test: C:\Users\hp\Documents\pietonDetectionProjet\Pedestrian-Dectection-4\test\images
+train: C:\Users\hp\Documents\pietonDetectionProjet\Pedestrian-Dectection-4\train\images
+val: C:\Users\hp\Documents\pietonDetectionProjet\Pedestrian-Dectection-4\valid\images

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détection des Piétons - YOLOv8</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2f3, #8e9eab);
+            color: #444;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #4CAF50;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #555;
+            display: block;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            font-size: 16px;
+            padding: 10px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            text-align: center;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #3e8e41;
+        }
+
+        .status-message {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #bbb; /* Gris clair */
+            display: block;
+            text-align: center;
+        }
+
+        .status-message.success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .status-message.error {
+            color: #bbb; /* Gris clair */
+            font-style: italic;
+        }
+
+        .upload-btn {
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #2193b0;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background-color: #1a7393;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px; /* Réduction de l'espace entre les boutons */
+        }
+
+        .section {
+            margin-bottom: 40px; /* Espacement entre les sections image et vidéo */
+        }
+
+        .output-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .output-section h2 {
+            font-size: 1.8em;
+            color: #2193b0;
+        }
+
+        .output-image, .output-video {
+            width: 100%;
+            max-width: 700px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        video {
+            max-width: 100%;
+            border-radius: 15px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+    <script>
+        // Gestion dynamique du message de statut
+        function handleFileInput(inputId, statusId) {
+            const input = document.getElementById(inputId);
+            const status = document.getElementById(statusId);
+
+            input.addEventListener('change', () => {
+                if (input.files.length > 0) {
+                    status.textContent = `Fichier sélectionné : ${input.files[0].name}`;
+                    status.className = 'status-message success';
+                } else {
+                    status.textContent = 'Aucun fichier sélectionné.';
+                    status.className = 'status-message error';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            handleFileInput('image-upload', 'image-status');
+            handleFileInput('video-upload', 'video-status');
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Détection des Piétons - YOLOv8</h1>
+
+    <!-- Formulaire pour télécharger une image -->
+    <div class="section">
+        <form id="image-form" action="/upload_image" method="POST" enctype="multipart/form-data">
+            <div class="button-group">
+                <label for="image-upload" class="custom-file-upload">
+                    Choisir une Image
+                </label>
+                <input id="image-upload" type="file" name="image" accept="image/*" required>
+                <span id="image-status" class="status-message error">Aucun fichier sélectionné.</span>
+                <button type="submit" class="upload-btn">Télécharger et Détecter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Formulaire pour télécharger une vidéo -->
+    <div class="section">
+        <form id="video-form" action="/upload_video" method="POST" enctype="multipart/form-data">
+            <div class="button-group">
+                <label for="video-upload" class="custom-file-upload">
+                    Choisir une Vidéo
+                </label>
+                <input id="video-upload" type="file" name="video" accept="video/*" required>
+                <span id="video-status" class="status-message error">Aucun fichier sélectionné.</span>
+                <button type="submit" class="upload-btn">Télécharger et Détecter</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Section de sortie -->
+    <div class="output-section">
+        {% if image_path %}
+            <h2>Avant la Détection</h2>
+            <img src="{{ url_for('send_file', filename=image_path) }}" class="output-image" alt="Image Originale">
+            <h2>Après la Détection</h2>
+            <img src="{{ url_for('send_file', filename=annotated_image) }}" class="output-image" alt="Image Annotée">
+        {% endif %}
+
+        {% if video_path %}
+            <h2>Avant la Détection</h2>
+            <video controls>
+                <source src="{{ url_for('send_file', filename=video_path) }}" type="video/mp4">
+                Votre navigateur ne prend pas en charge la balise vidéo.
+            </video>
+            <h2>Après la Détection</h2>
+            <video controls>
+                <source src="{{ url_for('send_file', filename=annotated_video, timestamp=timestamp) }}" type="video/mp4">
+                Votre navigateur ne prend pas en charge la balise vidéo.
+            </video>
+        {% endif %}
+    </div>
+</div>
+
+<footer>
+    © 2025 - Détection des Piétons avec YOLOv8 | Construit avec ❤️ et passion
+</footer>
+
+</body>
+</html>
