@@ -30,13 +30,12 @@ The pedestrian detection model is trained using the YOLOv8 architecture, leverag
 ### **Using `best.pt` Weights**
 After training, the model generates a file called `best.pt`, which contains the best-performing weights based on the evaluation metrics. To use these weights in the application:
 
-1. **Train the model:** Run the training script to fine-tune the YOLOv8 model using your custom dataset.
+1. **Train the model:** run the training script (Datainstallandtrain.py) to fine-tune the YOLOv8 model using your custom dataset.
 2. **Obtain `best.pt`:** After the training process completes, the best weights are saved as `best.pt`.
 3. **Load `best.pt` for Inference:** 
     - Load the model using the saved weights (`best.pt`) to perform detection on images or videos:
     ```python
     model = YOLO('path_to_best.pt')
-    results = model.predict('image_or_video_path')
     ```
 
  
